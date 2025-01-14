@@ -1,0 +1,67 @@
+<h2>Productos en Tiempo Real</h2>
+
+<ul id="product-list">
+  {{#each products}}
+    <li id="product-{{this.id}}">
+      {{this.title}} - ${{this.price}}
+      <button onclick="deleteProduct({{this.id}})">Eliminar</button>
+    </li>
+  {{/each}}
+</ul>
+
+<form id="product-form">
+  <h3>Cargar un nuevo producto</h3>
+  <input type="text" id="product-title" placeholder="Nombre del producto" required>
+  <input type="number" id="product-price" placeholder="Precio" required>
+  <input type="number" id="product-stock" placeholder="Stock" required>
+  <input type="text" id="product-category" placeholder="Categoría" required>
+  <button type="submit">Agregar Producto</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();  
+
+  socket.on('product-list', (products) => {
+  if (Array.isArray(products)) {
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = '';  
+    products.forEach(product => {
+      const li = document.createElement('li');
+      li.id = 'product-' + product.id;
+      li.innerHTML = `${product.title} - $${product.price} <button onclick="deleteProduct(${product.id})">Eliminar</button>`;
+      productList.appendChild(li);
+    });
+  }
+});
+
+
+  const form = document.getElementById('product-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById('product-title').value.trim();
+    const price = document.getElementById('product-price').value.trim();
+    const stock = document.getElementById('product-stock').value.trim();
+    const category = document.getElementById('product-category').value.trim();
+
+    if (!title || !price || !stock || !category) {
+      alert('Todos los campos son requeridos');
+      return;
+    }
+
+    const newProduct = { 
+      title: title, 
+      price: parseFloat(price),  
+      stock: parseInt(stock),    
+      category: category 
+    };
+
+    socket.emit('new-product', newProduct);
+    form.reset();
+  });
+
+  function deleteProduct(productId) {
+  socket.emit('delete-product', productId);
+  }
+</script>
