@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "title": "Collar Edgar",
+    "price": 2000,
+    "stock": 2,
+    "category": "Collar",
+    "id": 6238
+  },
+  {
+    "title": "Pulsera Lula",
+    "price": 2100,
+    "stock": 6,
+    "category": "Pulsera",
+    "id": 9647
+  }
+]

@@ -74,20 +74,21 @@ async getProducts() {
   async deleteProduct(productId) {
     const products = await this.getProducts();
     const productIndex = products.findIndex(p => p.id === productId);
-
+  
     if (productIndex === -1) {
       throw new Error('Producto no encontrado');
     }
-
-    products.splice(productIndex, 1);
-    const isSaved = await this.saveProducts(products);
+  
+    products.splice(productIndex, 1);  
+  
+    const isSaved = await this.saveProducts(products);  
     if (isSaved) {
-      this.io.emit('product-updated', products);
+      this.io.emit('product-updated', products);  
       return true;
     } else {
       throw new Error('No se pudo eliminar el producto');
     }
-  }
+  }  
 }
 
 export default ProductManager;

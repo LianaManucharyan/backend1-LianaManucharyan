@@ -2,9 +2,16 @@ import { Router } from "express";
 import ProductManager from '../managers/productManager.js';
 
 const viewsRouter = Router();
-const productManager = new ProductManager();  
 
-viewsRouter.get('/', async (req, res) => {
+export default function(io) {
+  const productManager = new ProductManager(io);  // Pasamos io aquí
+
+  viewsRouter.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
+  
+  viewsRouter.get('/', async (req, res) => {
     try {
         const products = await productManager.getProducts();  
         res.render('home', {
@@ -15,9 +22,9 @@ viewsRouter.get('/', async (req, res) => {
         console.error('Error al obtener productos:', error);
         res.status(500).send('Error al obtener productos');
     }
-});
+  });
 
-viewsRouter.get('/realtimeproducts', async (req, res) => {
+  viewsRouter.get('/realtimeproducts', async (req, res) => {
     try {
         const products = await productManager.getProducts();  
         res.render('realtimeproducts', {
@@ -28,14 +35,8 @@ viewsRouter.get('/realtimeproducts', async (req, res) => {
         console.error('Error al obtener productos:', error);
         res.status(500).send('Error al obtener productos');
     }
-});
-
-export default function(io) {
-  viewsRouter.use((req, res, next) => {
-    req.io = io;
-    next();
   });
-  
+
   io.on('connection', (socket) => {
     console.log('Nuevo cliente conectado');
     
@@ -63,7 +64,6 @@ export default function(io) {
       }
     });
   });
-
 
   return viewsRouter;
 }
