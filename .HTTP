@@ -1,0 +1,34 @@
+GET http://localhost:8080/api/users
+
+###
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "first_name": "",
+    "last_name": "",
+    "email": ""
+}
+
+###
+GET http://localhost:8080/api/users/679bf3035256e54732ab60b1
+
+###
+PUT http://localhost:8080/api/users/679bf3035256e54732ab60b1
+Content-Type: application/json
+
+{
+    "first_name": "Juan Ignacio",
+    "last_name": "Pérez",
+    "email": "juan.perez@gmail.com"
+}
+
+###
+DELETE http://localhost:8080/api/users/679bf3035256e54732ab60b1
+Content-Type: application/json
+
+{
+    "first_name": "Juan Ignacio",
+    "last_name": "Pérez",
+    "email": "juan.perez@gmail.com"
+}
