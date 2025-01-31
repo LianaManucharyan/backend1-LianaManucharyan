@@ -1,6 +1,47 @@
 <h2>Lista de Productos</h2>
+
+<form action="/products" method="get">
+  <label for="category">Categoría:</label>
+  <select name="query" id="category">
+    <option value="">Todas</option>
+    <option value="electronics">Electrónica</option>
+    <option value="fashion">Moda</option>
+    <option value="books">Libros</option>
+  </select>
+
+  <label for="sort">Ordenar por precio:</label>
+  <select name="sort" id="sort">
+    <option value="">Sin orden</option>
+    <option value="asc">Ascendente</option>
+    <option value="desc">Descendente</option>
+  </select>
+
+  <label for="limit">Productos por página:</label>
+  <select name="limit" id="limit">
+    <option value="10">10</option>
+    <option value="20">20</option>
+    <option value="30">30</option>
+  </select>
+
+  <button type="submit">Aplicar filtros</button>
+</form>
+
 <ul>
   {{#each products}}
-    <li>{{this.title}} - ${{this.price}}</li>
+    <li>
+      {{this.title}} - ${{this.price}}
+    </li>
   {{/each}}
 </ul>
+
+<div class="pagination">
+  {{#if hasPrevPage}}
+    <a href="/products?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Anterior</a>
+  {{/if}}
+
+  <span>Página {{page}} de {{totalPages}}</span>
+
+  {{#if hasNextPage}}
+    <a href="/products?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Siguiente</a>
+  {{/if}}
+</div>

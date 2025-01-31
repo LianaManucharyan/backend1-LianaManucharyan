@@ -1,74 +1,67 @@
-import { Router } from "express";
-import fs from 'fs';
-import { io } from '../../app.js'; 
+import express from 'express';
+import Cart from '../../models/cart.js';
 
-const cartsRoutes = Router();
+const router = express.Router();
 
-const getCarts = async () => {
-  try {
-    const data = await fs.promises.readFile('src/db/carts.json', 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
-  }
-};
 
-const saveCarts = async (carts) => {
-  try {
-    const data = JSON.stringify(carts, null, 2);
-    await fs.promises.writeFile('src/db/carts.json', data, 'utf-8');
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
-cartsRoutes.post('/', async (req, res) => {
-  const carts = await getCarts();
-  const newId = carts.length > 0 ? carts[carts.length - 1].id + 1 : 1;
-  const newCart = { id: newId, products: [] };
-  carts.push(newCart);
-
-  const isOk = await saveCarts(carts);
-  if (!isOk) {
-    return res.status(500).json({ status: 'Error', message: 'Could not create cart' });
-  }
-
-  io.emit('cart-updated', carts); 
-
-  res.status(201).json({ status: 'Ok', message: 'Cart created', cart: newCart });
-});
-
-cartsRoutes.post('/:cid/product/:pid', async (req, res) => {
+router.delete('/:cid/products/:pid', async (req, res) => {
   const { cid, pid } = req.params;
-  const carts = await getCarts();
-  const cart = carts.find(c => c.id == cid);
-  
-  if (!cart) {
-    return res.status(404).json({ status: 'Error', message: 'Cart not found' });
+  try {
+    const cart = await Cart.findById(cid);
+    const productIndex = cart.products.findIndex(p => p.productId.toString() === pid);
+    if (productIndex !== -1) {
+      cart.products.splice(productIndex, 1);
+      await cart.save();
+      res.status(200).json({ status: 'success', message: 'Producto eliminado del carrito' });
+    } else {
+      res.status(404).json({ status: 'error', message: 'Producto no encontrado en el carrito' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
   }
-
-  const products = await getProducts();
-  const product = products.find(p => p.id == pid);
-  if (!product) {
-    return res.status(404).json({ status: 'Error', message: 'Product not found' });
-  }
-
-  const existingProduct = cart.products.find(p => p.product == pid);
-  if (existingProduct) {
-    existingProduct.quantity += 1;
-  } else {
-    cart.products.push({ product: pid, quantity: 1 });
-  }
-
-  const isOk = await saveCarts(carts);
-  if (!isOk) {
-    return res.status(500).json({ status: 'Error', message: 'Could not add product to cart' });
-  }
-
-  io.emit('cart-updated', carts);  
-
-  res.json({ status: 'Ok', message: 'Product added to cart' });
 });
 
-export default cartsRoutes;
+router.put('/:cid', async (req, res) => {
+  const { cid } = req.params;
+  const { products } = req.body;
+  try {
+    const cart = await Cart.findById(cid);
+    cart.products = products;
+    await cart.save();
+    res.status(200).json({ status: 'success', message: 'Carrito actualizado' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+router.put('/:cid/products/:pid', async (req, res) => {
+  const { cid, pid } = req.params;
+  const { quantity } = req.body;
+  try {
+    const cart = await Cart.findById(cid);
+    const product = cart.products.find(p => p.productId.toString() === pid);
+    if (product) {
+      product.quantity = quantity;
+      await cart.save();
+      res.status(200).json({ status: 'success', message: 'Cantidad de producto actualizada' });
+    } else {
+      res.status(404).json({ status: 'error', message: 'Producto no encontrado en el carrito' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+router.delete('/:cid', async (req, res) => {
+  const { cid } = req.params;
+  try {
+    const cart = await Cart.findById(cid);
+    cart.products = [];
+    await cart.save();
+    res.status(200).json({ status: 'success', message: 'Carrito vacío' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+export default router;

@@ -1,5 +1,31 @@
 <h2>Productos en Tiempo Real</h2>
 
+<form action="/realtimeproducts" method="get">
+  <label for="category">Categoría:</label>
+  <select name="query" id="category">
+    <option value="">Todas</option>
+    <option value="electronics">Electrónica</option>
+    <option value="fashion">Moda</option>
+    <option value="books">Libros</option>
+  </select>
+
+  <label for="sort">Ordenar por precio:</label>
+  <select name="sort" id="sort">
+    <option value="">Sin orden</option>
+    <option value="asc">Ascendente</option>
+    <option value="desc">Descendente</option>
+  </select>
+
+  <label for="limit">Productos por página:</label>
+  <select name="limit" id="limit">
+    <option value="10">10</option>
+    <option value="20">20</option>
+    <option value="30">30</option>
+  </select>
+
+  <button type="submit">Aplicar filtros</button>
+</form>
+
 <ul id="product-list">
   {{#each products}}
     <li id="product-{{this.id}}">
@@ -8,6 +34,18 @@
     </li>
   {{/each}}
 </ul>
+
+<div class="pagination">
+  {{#if hasPrevPage}}
+    <a href="/realtimeproducts?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Anterior</a>
+  {{/if}}
+
+  <span>Página {{page}} de {{totalPages}}</span>
+
+  {{#if hasNextPage}}
+    <a href="/realtimeproducts?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Siguiente</a>
+  {{/if}}
+</div>
 
 <form id="product-form">
   <h3>Cargar un nuevo producto</h3>
@@ -23,18 +61,17 @@
   const socket = io();  
 
   socket.on('product-list', (products) => {
-  if (Array.isArray(products)) {
-    const productList = document.getElementById('product-list');
-    productList.innerHTML = '';  
-    products.forEach(product => {
-      const li = document.createElement('li');
-      li.id = 'product-' + product.id;
-      li.innerHTML = `${product.title} - $${product.price} <button onclick="deleteProduct(${product.id})">Eliminar</button>`;
-      productList.appendChild(li);
-    });
-  }
-});
-
+    if (Array.isArray(products)) {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = '';  
+      products.forEach(product => {
+        const li = document.createElement('li');
+        li.id = 'product-' + product.id;
+        li.innerHTML = `${product.title} - $${product.price} <button onclick="deleteProduct(${product.id})">Eliminar</button>`;
+        productList.appendChild(li);
+      });
+    }
+  });
 
   const form = document.getElementById('product-form');
   form.addEventListener('submit', (e) => {
@@ -62,6 +99,6 @@
   });
 
   function deleteProduct(productId) {
-  socket.emit('delete-product', productId);
+    socket.emit('delete-product', productId);
   }
 </script>

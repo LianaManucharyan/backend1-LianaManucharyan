@@ -1,69 +1,25 @@
-import { Router } from "express";
-import ProductManager from '../managers/productManager.js';
+viewsRouter.get('/realtimeproducts', async (req, res) => {
+  const { limit = 10, page = 1, sort = '', query = '' } = req.query;
 
-const viewsRouter = Router();
+  try {
+    const products = await productManager.getProducts({ limit, page, sort, query });
+    const totalCount = await productManager.countProducts(query);
+    const totalPages = Math.ceil(totalCount / limit);
 
-export default function(io) {
-  const productManager = new ProductManager(io);  // Pasamos io aquí
-
-  viewsRouter.use((req, res, next) => {
-    req.io = io;
-    next();
-  });
-  
-  viewsRouter.get('/', async (req, res) => {
-    try {
-        const products = await productManager.getProducts();  
-        res.render('home', {
-            title: 'Home - Mi Tienda',
-            products: products
-        });
-    } catch (error) {
-        console.error('Error al obtener productos:', error);
-        res.status(500).send('Error al obtener productos');
-    }
-  });
-
-  viewsRouter.get('/realtimeproducts', async (req, res) => {
-    try {
-        const products = await productManager.getProducts();  
-        res.render('realtimeproducts', {
-            title: 'Productos en Tiempo Real',
-            products: products
-        });
-    } catch (error) {
-        console.error('Error al obtener productos:', error);
-        res.status(500).send('Error al obtener productos');
-    }
-  });
-
-  io.on('connection', (socket) => {
-    console.log('Nuevo cliente conectado');
-    
-    socket.emit('product-list', productManager.getProducts()); 
-
-    socket.on('new-product', async (product) => {
-      try {
-        await productManager.createProduct(product);
-        const products = await productManager.getProducts();
-        io.emit('product-list', products); 
-      } catch (error) {
-        console.error("Error al agregar el producto:", error);
-      }
+    res.render('realtimeproducts', {
+      title: 'Productos en Tiempo Real',
+      products,
+      totalPages,
+      currentPage: page,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      prevLink: page > 1 ? `/realtimeproducts?page=${page - 1}&limit=${limit}&query=${query}&sort=${sort}` : null,
+      nextLink: page < totalPages ? `/realtimeproducts?page=${page + 1}&limit=${limit}&query=${query}&sort=${sort}` : null
     });
-  
-    socket.on('delete-product', async (productId) => {
-      try {
-        const success = await productManager.deleteProduct(productId); 
-        if (success) {
-          const products = await productManager.getProducts(); 
-          io.emit('product-list', products); 
-        }
-      } catch (error) {
-        console.error("Error al eliminar el producto:", error);
-      }
-    });
-  });
-
-  return viewsRouter;
-}
+  } catch (error) {
+    console.error('Error al obtener productos:', error);
+    res.status(500).send('Error al obtener productos');
+  }
+});
