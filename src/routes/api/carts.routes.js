@@ -3,6 +3,21 @@ import Cart from '../../models/cart.js';
 
 const router = express.Router();
 
+router.get('/:cid', async (req, res) => {
+  const { cid } = req.params;
+  try {
+    const cart = await Cart.findById(cid).populate('products.productId');
+    if (!cart) {
+      return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
+    }
+    res.json({
+      status: 'success',
+      payload: cart.products,
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
 
 router.delete('/:cid/products/:pid', async (req, res) => {
   const { cid, pid } = req.params;
