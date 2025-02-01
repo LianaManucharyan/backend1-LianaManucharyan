@@ -1,3 +1,8 @@
+import express from 'express';
+import productManager from '../managers/productManager.js';  
+
+const viewsRouter = express.Router();
+
 viewsRouter.get('/realtimeproducts', async (req, res) => {
   const { limit = 10, page = 1, sort = '', query = '' } = req.query;
 
@@ -23,3 +28,5 @@ viewsRouter.get('/realtimeproducts', async (req, res) => {
     res.status(500).send('Error al obtener productos');
   }
 });
+
+export default viewsRouter;
