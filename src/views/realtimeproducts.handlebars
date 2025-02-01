@@ -4,9 +4,9 @@
   <label for="category">Categoría:</label>
   <select name="query" id="category">
     <option value="">Todas</option>
-    <option value="electronics">Electrónica</option>
-    <option value="fashion">Moda</option>
-    <option value="books">Libros</option>
+    <option value="aros">Aros</option>
+    <option value="pulseras">Pulseras</option>
+    <option value="anillos">anillos</option>
   </select>
 
   <label for="sort">Ordenar por precio:</label>
@@ -18,9 +18,9 @@
 
   <label for="limit">Productos por página:</label>
   <select name="limit" id="limit">
-    <option value="10">10</option>
-    <option value="20">20</option>
-    <option value="30">30</option>
+    <option value="4">4</option>
+    <option value="4">4</option>
+    <option value="4">4</option>
   </select>
 
   <button type="submit">Aplicar filtros</button>
@@ -48,17 +48,20 @@
 </div>
 
 <script>
+  const cartId = 'tu_cart_id_aqui'; 
+
   function addToCart(productId) {
     fetch(`/api/carts/${cartId}/products/${productId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ quantity: 1 }),
-    }).then(response => response.json())
-      .then(data => {
-        alert('Producto agregado al carrito');
-      })
-      .catch(error => {
-        console.error('Error al agregar al carrito', error);
-      });
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert('Producto agregado al carrito');
+    })
+    .catch(error => {
+      console.error('Error al agregar al carrito', error);
+    });
   }
 </script>

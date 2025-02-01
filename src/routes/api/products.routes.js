@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 
     res.json({
       status: 'success',
-      payload: products,
+      payload: product,
       totalPages,
       prevPage: page > 1 ? page - 1 : null,
       nextPage: page < totalPages ? page + 1 : null,
@@ -43,5 +43,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
+
 
 export default router;

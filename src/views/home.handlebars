@@ -1,12 +1,12 @@
 <h2>Lista de Productos</h2>
 
-<form action="/products" method="get">
+<form action="/" method="get">
   <label for="category">Categoría:</label>
   <select name="query" id="category">
     <option value="">Todas</option>
-    <option value="electronics">Electrónica</option>
-    <option value="fashion">Moda</option>
-    <option value="books">Libros</option>
+    <option value="anillos">Anillos</option>
+    <option value="aros">Aros</option>
+    <option value="pulseras">Pulseras</option>
   </select>
 
   <label for="sort">Ordenar por precio:</label>
@@ -18,9 +18,9 @@
 
   <label for="limit">Productos por página:</label>
   <select name="limit" id="limit">
-    <option value="10">10</option>
-    <option value="20">20</option>
-    <option value="30">30</option>
+    <option value="4">4</option>
+    <option value="8">8</option>
+    <option value="12">12</option>
   </select>
 
   <button type="submit">Aplicar filtros</button>
@@ -36,12 +36,12 @@
 
 <div class="pagination">
   {{#if hasPrevPage}}
-    <a href="/products?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Anterior</a>
+    <a href="/?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Anterior</a>
   {{/if}}
 
   <span>Página {{page}} de {{totalPages}}</span>
 
   {{#if hasNextPage}}
-    <a href="/products?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Siguiente</a>
+    <a href="/?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Siguiente</a>
   {{/if}}
 </div>
