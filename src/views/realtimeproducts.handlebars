@@ -1,67 +1,60 @@
-<h2>Productos en Tiempo Real</h2>
+<h1>Bienvenido a la página de productos en tiempo real</h1>
 
-<form action="/realtimeproducts" method="get">
-  <label for="category">Categoría:</label>
-  <select name="query" id="category">
-    <option value="">Todas</option>
-    <option value="aros">Aros</option>
-    <option value="pulseras">Pulseras</option>
-    <option value="anillos">anillos</option>
-  </select>
-
-  <label for="sort">Ordenar por precio:</label>
-  <select name="sort" id="sort">
-    <option value="">Sin orden</option>
-    <option value="asc">Ascendente</option>
-    <option value="desc">Descendente</option>
-  </select>
-
-  <label for="limit">Productos por página:</label>
-  <select name="limit" id="limit">
-    <option value="4">4</option>
-    <option value="4">4</option>
-    <option value="4">4</option>
-  </select>
-
-  <button type="submit">Aplicar filtros</button>
+<h2>Agregar Producto</h2>
+<form id="addProductForm" method="POST" action="/api/products">
+  <input type="text" name="title" placeholder="Nombre del producto" required>
+  <input type="number" name="price" placeholder="Precio" required>
+  <input type="text" name="description" placeholder="Descripción" required>
+  <input type="number" name="stock" placeholder="Stock" required>
+  <input type="text" name="category" placeholder="Categoría" required>
+  <button type="submit">Agregar</button>
 </form>
 
-<ul id="product-list">
-  {{#each products}}
-    <li id="product-{{this._id}}">
-      {{this.name}} - ${{this.price}} 
-      <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
-    </li>
-  {{/each}}
-</ul>
-
-<div class="pagination">
-  {{#if hasPrevPage}}
-    <a href="/realtimeproducts?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Anterior</a>
-  {{/if}}
-
-  <span>Página {{page}} de {{totalPages}}</span>
-
-  {{#if hasNextPage}}
-    <a href="/realtimeproducts?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Siguiente</a>
-  {{/if}}
-</div>
+<h2>Eliminar Producto</h2>
+<form id="deleteProductForm" onsubmit="deleteProduct(event)">
+  <input type="text" name="id" placeholder="ID del producto" required>
+  <button type="submit">Eliminar</button>
+</form>
 
 <script>
-  const cartId = 'tu_cart_id_aqui'; 
+  function deleteProduct(event) {
+    event.preventDefault(); 
+    const form = event.target;
 
-  function addToCart(productId) {
-    fetch(`/api/carts/${cartId}/products/${productId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity: 1 }),
+    const productId = form.id.value;
+
+    fetch(`/api/products/${productId}`, {
+      method: 'DELETE'
     })
     .then(response => response.json())
     .then(data => {
-      alert('Producto agregado al carrito');
+      if (data.status === 'success') {
+        socket.emit('productDeleted', data.product);
+
+        const productElement = document.querySelector(`[data-id="${productId}"]`);
+        if (productElement) {
+          productElement.remove();
+        }
+      }
     })
     .catch(error => {
-      console.error('Error al agregar al carrito', error);
+      console.error('Error al eliminar producto:', error);
+      alert('Error al eliminar producto');
     });
+
+    form.reset();
   }
 </script>
+
+<h2>Lista de productos</h2>
+<ul id="productList">
+  {{#each products}} 
+    <li>
+      <strong>Producto: </strong>{{this.title}} 
+      <strong>Precio: </strong>{{this.price}} 
+      <strong>Categoría: </strong>{{this.category}} 
+      <strong>Descripción: </strong>{{this.description}} 
+      <hr>
+    </li>
+  {{/each}}
+</ul>

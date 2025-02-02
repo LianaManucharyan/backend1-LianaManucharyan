@@ -1,22 +1,33 @@
-import Product from '../models/product.js'; 
+import Product from '../models/product.js';
 
 class ProductManager {
   async getProducts({ limit, page, sort, query }) {
-    const filters = query ? { category: query } : {};
-    const sortOptions = sort === 'asc' ? { price: 1 } : sort === 'desc' ? { price: -1 } : {};
+    const filters = query ? { category: query } : {}; 
 
-    const products = await Product.find(filters)
-      .skip((page - 1) * limit) 
-      .limit(Number(limit)) 
-      .sort(sortOptions);
+    const sortOptions = sort === 'asc' ? { price: 1 } : sort === 'desc' ? { price: -1 } : {}; 
 
-    return products;
+    try {
+      const products = await Product.find(filters)
+        .skip((page - 1) * limit) 
+        .limit(Number(limit))  
+        .sort(sortOptions);  
+
+      return products;
+    } catch (error) {
+      throw new Error('Error al obtener los productos: ' + error.message);
+    }
   }
 
   async countProducts(query) {
     const filters = query ? { category: query } : {};
-    return await Product.countDocuments(filters);
+    
+    try {
+      const count = await Product.countDocuments(filters);
+      return count;
+    } catch (error) {
+      throw new Error('Error al contar los productos: ' + error.message);
+    }
   }
 }
 
-export default ProductManager;
+export default new ProductManager();

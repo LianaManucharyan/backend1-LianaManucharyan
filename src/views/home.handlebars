@@ -1,47 +1,55 @@
-<h2>Lista de Productos</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+</head>
+<body>
 
-<form action="/" method="get">
-  <label for="category">Categoría:</label>
-  <select name="query" id="category">
-    <option value="">Todas</option>
-    <option value="Anillos">Anillos</option>
-    <option value="Aros">Aros</option>
-    <option value="Pulseras">Pulseras</option>
-  </select>
+  <header>
+    <h1>Bienvenido a la página principal</h1>
+    <form method="GET" action="/">
+      <label for="category">Filtrar por categoría:</label>
+      <select name="query" id="category">
+        <option value="">Selecciona una categoría</option>
+        <option value="Anillos" {{#if (eq query "Anillos")}}selected{{/if}}>Anillos</option>
+        <option value="Aros" {{#if (eq query "Aros")}}selected{{/if}}>Aros</option>
+        <option value="Pulseras" {{#if (eq query "Pulseras")}}selected{{/if}}>Pulseras</option>
+      </select>
+      <button type="submit">Filtrar</button>
+    </form>
+  </header>
 
-  <label for="sort">Ordenar por precio:</label>
-  <select name="sort" id="sort">
-    <option value="">Sin orden</option>
-    <option value="asc">Ascendente</option>
-    <option value="desc">Descendente</option>
-  </select>
+  <main>
+    <h2>Lista de productos</h2>
+    <ul>
+      {{#each products}} 
+        <li>
+          <strong>Producto: </strong>{{this.title}} 
+          <strong>Precio: </strong>{{this.price}} 
+          <strong>Categoría: </strong>{{this.category}} 
+          <strong>Descripción: </strong>{{this.description}} 
 
-  <label for="limit">Productos por página:</label>
-  <select name="limit" id="limit">
-    <option value="4">4</option>
-    <option value="4">4</option>
-    <option value="4">4</option>
-  </select>
+          <form action="/api/carts/{{this._id}}/products" method="POST">
+            <button type="submit">Agregar al carrito</button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
 
-  <button type="submit">Aplicar filtros</button>
-</form>
+    <div class="pagination">
+      {{#if hasPrevPage}}
+        <a href="?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Anterior</a>
+      {{/if}}
 
-<ul>
-  {{#each products}}
-    <li>
-      {{this.title}} - ${{this.price}}
-    </li>
-  {{/each}}
-</ul>
+      <span>Página {{currentPage}} de {{totalPages}}</span>
 
-<div class="pagination">
-  {{#if hasPrevPage}}
-    <a href="/?page={{prevPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Anterior</a>
-  {{/if}}
+      {{#if hasNextPage}}
+        <a href="?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Siguiente</a>
+      {{/if}}
+    </div>
+  </main>
 
-  <span>Página {{page}} de {{totalPages}}</span>
-
-  {{#if hasNextPage}}
-    <a href="/?page={{nextPage}}&limit={{limit}}&query={{query}}&sort={{sort}}">Página Siguiente</a>
-  {{/if}}
-</div>
+</body>
+</html>

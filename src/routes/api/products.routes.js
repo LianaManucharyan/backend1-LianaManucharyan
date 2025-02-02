@@ -4,7 +4,7 @@ import Product from '../../models/product.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const { limit = 10, page = 1, sort = '', query = '' } = req.query;
+  const { limit = 5, page = 1, sort = '', query = '' } = req.query;
 
   const filters = {};
   if (query) {
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 
     res.json({
       status: 'success',
-      payload: product,
+      payload: products,
       totalPages,
       prevPage: page > 1 ? page - 1 : null,
       nextPage: page < totalPages ? page + 1 : null,
@@ -44,5 +44,47 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/', async (req, res) => {
+  const { title, description, price, category, stock } = req.body;
+
+  if (!title || !description || !price || !category || !stock) {
+    return res.status(400).json({ status: 'error', message: 'Faltan datos para crear el producto' });
+  }
+
+  try {
+    const newProduct = new Product({
+      title,
+      description,
+      price,
+      category,
+      stock
+    });
+
+    await newProduct.save();
+
+    req.io.emit('newProduct', newProduct); 
+
+    res.status(201).json({ status: 'success', message: 'Producto creado exitosamente', product: newProduct });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
+    }
+
+    req.io.emit('productDeleted', deletedProduct);  
+    res.status(200).json({ status: 'success', message: 'Producto eliminado correctamente', product: deletedProduct });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
 
 export default router;

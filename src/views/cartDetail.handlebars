@@ -11,7 +11,7 @@
           <button type="submit">Actualizar cantidad</button>
         </form>
         
-        <form action="/api/carts/{{this.cartId}}/products/{{this.productId._id}}" method="POST" style="display:inline;">
+        <form action="/api/carts/{{this.cartId}}/products/{{this.productId._id}}/delete" method="POST" style="display:inline;">
           <button type="submit">Eliminar</button>
         </form>
       </li>
@@ -20,7 +20,6 @@
   
   <div class="cart-summary">
     <p>Total: ${{total}}</p>
-    <button><a href="/checkout">Proceder a la compra</a></button>
   </div>
 {{else}}
   <p>Tu carrito está vacío. ¡Agrega algunos productos!</p>
