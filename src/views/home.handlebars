@@ -9,29 +9,48 @@
 
   <header>
     <h1>Bienvenido a la página principal</h1>
+
     <form method="GET" action="/">
-      <label for="category">Filtrar por categoría:</label>
-      <select name="query" id="category">
-        <option value="">Selecciona una categoría</option>
-        <option value="Anillos" {{#if (eq query "Anillos")}}selected{{/if}}>Anillos</option>
-        <option value="Aros" {{#if (eq query "Aros")}}selected{{/if}}>Aros</option>
-        <option value="Pulseras" {{#if (eq query "Pulseras")}}selected{{/if}}>Pulseras</option>
-      </select>
-      <button type="submit">Filtrar</button>
+    <label for="category">Filtrar por categoría:</label>
+    <select name="query" id="category">
+      <option value="">Selecciona una categoría</option>
+      <option value="Anillos" {{#if (eq query "Anillos")}}selected{{/if}}>Anillos</option>
+      <option value="Aros" {{#if (eq query "Aros")}}selected{{/if}}>Aros</option>
+      <option value="Pulseras" {{#if (eq query "Pulseras")}}selected{{/if}}>Pulseras</option>
+    </select>
+
+    <label for="sort">Ordenar por precio:</label>
+    <select name="sort" id="sort">
+      <option value="">Selecciona orden</option>
+      <option value="asc" {{#if (eq sort "asc")}}selected{{/if}}>Ascendente</option>
+      <option value="desc" {{#if (eq sort "desc")}}selected{{/if}}>Descendente</option>
+    </select>
+
+    <label for="limit">Limitar a:</label>
+    <select name="limit" id="limit">
+      <option value="2" {{#if (eq limit "2")}}selected{{/if}}>2</option>
+      <option value="4" {{#if (eq limit "4")}}selected{{/if}}>4</option>
+      <option value="12" {{#if (eq limit "12")}}selected{{/if}}>12</option>
+    </select>
+
+    <button type="submit">Filtrar</button>
     </form>
   </header>
 
   <main>
     <h2>Lista de productos</h2>
+
     <ul>
       {{#each products}} 
         <li>
-          <strong>Producto: </strong>{{this.title}} 
-          <strong>Precio: </strong>{{this.price}} 
-          <strong>Categoría: </strong>{{this.category}} 
-          <strong>Descripción: </strong>{{this.description}} 
+          <strong>Producto: </strong>{{this.title}} <br>
+          <strong>Precio: </strong>${{this.price}} <br>
+          <strong>Categoría: </strong>{{this.category}} <br>
+          <strong>Descripción: </strong>{{this.description}} <br>
 
-          <form action="/api/carts/{{this._id}}/products" method="POST">
+          <form action="/api/carts/67a4b354e334dcce62cf86ef/products/{{this._id}}" method="POST">
+            <label for="quantity">Cantidad:</label>
+            <input type="number" name="quantity" value="1" min="1" max="{{this.stock}}" />
             <button type="submit">Agregar al carrito</button>
           </form>
         </li>
@@ -51,5 +70,12 @@
     </div>
   </main>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.on('newProduct', (newProduct) => {
+      console.log('Nuevo producto agregado:', newProduct);
+    });
+  </script>
 </body>
 </html>

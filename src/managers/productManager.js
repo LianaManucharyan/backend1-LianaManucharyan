@@ -4,7 +4,12 @@ class ProductManager {
   async getProducts({ limit, page, sort, query }) {
     const filters = query ? { category: query } : {}; 
 
-    const sortOptions = sort === 'asc' ? { price: 1 } : sort === 'desc' ? { price: -1 } : {}; 
+    const sortOptions = {};
+    if (sort === 'asc') {
+      sortOptions.price = 1; 
+    } else if (sort === 'desc') {
+      sortOptions.price = -1; 
+    }
 
     try {
       const products = await Product.find(filters)

@@ -5,22 +5,49 @@
     {{#each products}}
       <li>
         <strong>{{this.productId.title}}</strong> - ${{this.productId.price}} x {{this.quantity}}
-        
-        <form action="/api/carts/{{this.cartId}}/products/{{this.productId._id}}" method="POST">
+
+        <form action="/api/carts/67a4b354e334dcce62cf86ef/products/{{this.productId._id}}" method="POST">
           <input type="number" name="quantity" value="{{this.quantity}}" min="1">
           <button type="submit">Actualizar cantidad</button>
         </form>
-        
-        <form action="/api/carts/{{this.cartId}}/products/{{this.productId._id}}/delete" method="POST" style="display:inline;">
+
+        <form onsubmit="event.preventDefault(); deleteProduct('{{cartId}}', '{{this.productId._id}}');" style="display:inline;">
           <button type="submit">Eliminar</button>
         </form>
       </li>
     {{/each}}
   </ul>
-  
+
   <div class="cart-summary">
     <p>Total: ${{total}}</p>
   </div>
+
+  <form action="/api/carts/empty" method="POST">
+    <input type="hidden" name="cartId" value="67a4b354e334dcce62cf86ef">
+    <button type="submit">Vaciar Carrito</button>
+  </form>
+
 {{else}}
   <p>Tu carrito está vacío. ¡Agrega algunos productos!</p>
 {{/if}}
+
+<script>
+  function deleteProduct(cartId, productId) {
+    fetch(`/api/carts/67a4b354e334dcce62cf86ef/products/${productId}/delete`, {
+      method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert('Producto eliminado correctamente');
+        location.reload(); 
+      } else {
+        alert('Error al eliminar producto');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Hubo un problema al eliminar el producto');
+    });
+  }
+</script>

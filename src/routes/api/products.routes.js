@@ -62,7 +62,9 @@ router.post('/', async (req, res) => {
 
     await newProduct.save();
 
-    req.io.emit('newProduct', newProduct); 
+    if (req.io) {
+      req.io.emit('newProduct', newProduct);
+    }
 
     res.status(201).json({ status: 'success', message: 'Producto creado exitosamente', product: newProduct });
   } catch (error) {
@@ -73,17 +75,23 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
+  console.log("Solicitud DELETE recibida para el id:", id);  
+
   try {
-    const deletedProduct = await Product.findByIdAndDelete(id);
+    const deletedProduct = await Product.findByIdAndDelete(id); 
 
     if (!deletedProduct) {
-      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
+      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' }); 
     }
 
-    req.io.emit('productDeleted', deletedProduct);  
+    if (req.io) {
+      req.io.emit('productDeleted', deletedProduct._id); 
+    }
+
     res.status(200).json({ status: 'success', message: 'Producto eliminado correctamente', product: deletedProduct });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    console.error("Error al eliminar producto:", error); 
+    res.status(500).json({ status: 'error', message: error.message });  
   }
 });
 

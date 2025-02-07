@@ -12,7 +12,7 @@
 
 <h2>Eliminar Producto</h2>
 <form id="deleteProductForm" onsubmit="deleteProduct(event)">
-  <input type="text" name="id" placeholder="ID del producto" required>
+  <input type="text" id="productId" name="id" placeholder="ID del producto" required>
   <button type="submit">Eliminar</button>
 </form>
 
@@ -20,8 +20,7 @@
   function deleteProduct(event) {
     event.preventDefault(); 
     const form = event.target;
-
-    const productId = form.id.value;
+    const productId = form.id.value; 
 
     fetch(`/api/products/${productId}`, {
       method: 'DELETE'
@@ -29,18 +28,18 @@
     .then(response => response.json())
     .then(data => {
       if (data.status === 'success') {
-        socket.emit('productDeleted', data.product);
+        alert('Producto eliminado exitosamente');
+        
+        socket.emit('productDeleted', productId);  
 
         const productElement = document.querySelector(`[data-id="${productId}"]`);
         if (productElement) {
           productElement.remove();
         }
+      } else {
+        console.log('Error al eliminar producto');
       }
     })
-    .catch(error => {
-      console.error('Error al eliminar producto:', error);
-      alert('Error al eliminar producto');
-    });
 
     form.reset();
   }
@@ -49,7 +48,7 @@
 <h2>Lista de productos</h2>
 <ul id="productList">
   {{#each products}} 
-    <li>
+    <li data-id="{{this._id}}">
       <strong>Producto: </strong>{{this.title}} 
       <strong>Precio: </strong>{{this.price}} 
       <strong>Categoría: </strong>{{this.category}} 
@@ -58,3 +57,28 @@
     </li>
   {{/each}}
 </ul>
+
+<script>
+  const socket = io();
+
+  socket.on('newProduct', (newProduct) => {
+    const productList = document.getElementById('productList');
+    const newProductItem = document.createElement('li');
+    newProductItem.setAttribute('data-id', newProduct._id); 
+    newProductItem.innerHTML = `
+      <strong>Producto: </strong>${newProduct.title} 
+      <strong>Precio: </strong>${newProduct.price} 
+      <strong>Categoría: </strong>${newProduct.category} 
+      <strong>Descripción: </strong>${newProduct.description} 
+      <hr>
+    `;
+    productList.appendChild(newProductItem);
+  });
+
+  socket.on('productDeleted', (productId) => {
+    const productElement = document.querySelector(`[data-id="${productId}"]`);
+    if (productElement) {
+      productElement.remove();  
+    }
+  });
+</script>
