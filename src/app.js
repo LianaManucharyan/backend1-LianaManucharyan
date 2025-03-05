@@ -7,6 +7,7 @@ import viewsRoutes from './routes/views.router.js';
 import mongoose from 'mongoose';
 import Product from './models/product.js';
 import Cart from './models/cart.js'; 
+import sessionsRoutes from './routes/sessions.routes.js'; 
 
 const app = express();
 const PORT = 8080;
@@ -43,11 +44,12 @@ app.use((req, res, next) => {
 
 app.use('/api/products', productsRoutes);
 app.use('/api/carts', cartRoutes);
+app.use('/api/sessions', sessionsRoutes);  
 app.use('/', viewsRoutes);
 
 const connectDb = async () => {
   try {
-    await mongoose.connect('mongodb+srv://lianamanucharyan002:lFpAttBQRk86o7lB@cluster0.v00xs.mongodb.net/backendLianaM?retryWrites=true&w=majority&appName=Cluster0');
+    await mongoose.connect('mongodb+srv://lianamanucharyan002:2brmAjR4ZWmN6NQB@cluster0.v00xs.mongodb.net/backendLianaM');
     console.log('Conectado a MongoDB');
   } catch (err) {
     console.error('Error al conectar a MongoDB:', err);
@@ -144,3 +146,5 @@ app.post('/api/carts/empty', async (req, res) => {
     res.status(500).json({ status: 'error', message: 'Error al vaciar el carrito' });
   }
 });
+
+export default app;
